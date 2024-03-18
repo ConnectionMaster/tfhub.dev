@@ -11,6 +11,10 @@ values:
     display_name: Audio event classification
     domains:
       - audio
+  - id: audio-paralinguistics
+    display_name: Audio paralinguistics classification
+    domains:
+      - audio
   - id: audio-pitch-extraction
     display_name: Audio pitch extraction
     domains:
@@ -27,6 +31,10 @@ values:
     display_name: Audio Speech-to-Text
     domains:
       - audio
+  - id: image-aesthetic-quality
+    display_name: Image Aesthetic Quality
+    domains:
+      - image
   - id: image-augmentation
     display_name: Image augmentation
     domains:
@@ -53,6 +61,10 @@ values:
       - image
   - id: image-feature-vector
     display_name: Image feature vector
+    domains:
+      - image
+  - id: image-frame-interpolation
+    display_name: Image Frame Interpolation
     domains:
       - image
   - id: image-generator
@@ -96,6 +108,10 @@ values:
     display_name: Image text recognition
     domains:
       - image
+      - text
+  - id: text-sequence-alignment
+    display_name: Biological sequence alignment
+    domains:
       - text
   - id: text-classification
     display_name: Text classification
@@ -152,3 +168,27 @@ values:
     domains:
       - video
       - text
+  - id: image-denoising
+    display_name: Image denoising
+    domains:
+      - image
+  - id: image-dehazing
+    display_name: Image dehazing
+    domains:
+      - image
+  - id: image-deraining
+    display_name: Image deraining
+    domains:
+      - image
+  - id: image-deblurring
+    display_name: Image deblurring
+    domains:
+      - image
+  - id: image-enhancement
+    display_name: Image enhancement
+    domains:
+      - image
+  - id: video-feature-extraction
+    display_name: Video Feature Extraction
+    domains:
+      - video

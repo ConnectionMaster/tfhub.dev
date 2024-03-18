@@ -38,6 +38,7 @@ import re
 import subprocess
 import sys
 import tarfile
+import time
 import textwrap
 from typing import AbstractSet, Iterator, Mapping, MutableSequence, Optional, Sequence, Type, TypeVar
 import urllib.request
@@ -56,6 +57,9 @@ from tensorflow.core.protobuf import saved_model_pb2
 # pylint: enable=g-direct-tensorflow-import
 
 FLAGS = None
+
+_CI_ENV_KEY = "GITHUB_ACTION"
+_SLEEP_SECONDS = 5
 
 # Relative path from tfhub.dev/ to the docs/ directory.
 DOCS_PATH = "assets/docs"
@@ -167,7 +171,8 @@ TFLITE_SUFFIX = ".tflite"
 # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md  # pylint: disable=line-too-long
 ALLOWED_SAVED_MODEL_PATHS = frozenset([
     "saved_model.pb", "saved_model.pbtxt", "tfhub_module.pb",
-    "keras_metadata.pb", "assets/*", "assets.extra/*", "variables/variables.*"
+    "keras_metadata.pb", "assets/*", "assets.extra/*", "variables/variables.*",
+    "fingerprint.pb"
 ])
 
 ParsingPolicyType = TypeVar("ParsingPolicyType", bound="ParsingPolicy")
@@ -197,6 +202,10 @@ def _is_asset_path_modified(file_path: str) -> bool:
   else:
     raise MarkdownDocumentationError(
         f"Internal: grep command returned unexpected exit code {return_code}")
+
+
+def _should_sleep() -> bool:
+  return os.environ.get(_CI_ENV_KEY, None) is not None
 
 
 def _check_that_saved_model_pb_parses(tar: tarfile.TarFile,
@@ -371,7 +380,7 @@ class ParsingPolicy(metaclass=abc.ABCMeta):
   @property
   def supported_metadata(self) -> AbstractSet[str]:
     """Return which metadata tags are supported."""
-    return set.union(self._required_metadata, self._optional_metadata)
+    return set.union(self._required_metadata, self._optional_metadata)  # pytype: disable=wrong-arg-types
 
   def get_allowed_file_paths(self, documentation_dir: str) -> Sequence[str]:
     """Returns the paths at which the documentation can be stored.
@@ -587,12 +596,10 @@ class ModelParsingPolicy(ParsingPolicy):
           f"Expected asset-path to end with {self._supported_asset_path_suffix}"
           f" but was {asset_path}.")
 
-    # GitHub's robots.txt disallows fetches to */download, which means that
+    # GitHub's robots.txt disallows fetches from many paths, which means that
     # the asset-path URL cannot be fetched. Markdown validation should fail if
-    # asset-path matches this regex.
-    github_download_url_regex = re.compile(
-        "https://github.com/.*/releases/download/.*")
-    if github_download_url_regex.fullmatch(asset_path):
+    # asset-path matches this.
+    if asset_path.startswith(("https://github.com/", "http://github.com/")):
       raise MarkdownDocumentationError(
           f"The asset-path {asset_path} is a url that cannot be automatically "
           "fetched. Please provide an asset-path that is allowed to be fetched "
@@ -748,6 +755,9 @@ class SavedModelParsingPolicy(ModelParsingPolicy):
           SavedModel proto.
     """
     valid_saved_model_proto_found = False
+    # Wait before each check to prevent exhausting storage read quota.
+    if _should_sleep():
+      time.sleep(_SLEEP_SECONDS)
     with urllib.request.urlopen(remote_archive) as url_contents:
       try:
         with tarfile.open(fileobj=url_contents, mode="r|gz") as tar:

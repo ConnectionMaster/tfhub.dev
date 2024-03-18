@@ -65,6 +65,8 @@ values:
     display_name: Faster R-CNN
   - id: gan
     display_name: GAN
+  - id: hrnet-v2-w48
+    display_name: HRNetV2-W48
   - id: i3d
     display_name: I3D
   - id: inception-resnet-v2
@@ -87,6 +89,8 @@ values:
     display_name: MobileBert uncased_L-24_H-128_B-512_A-4_F-4_OPT
   - id: mobilebert
     display_name: MobileBert
+  - id: mobilebert-edgetpu-s
+    display_name: MobileBert EdgeTPU Small
   - id: mobilenet
     display_name: MobileNet
   - id: mobilenet-v1
@@ -95,6 +99,8 @@ values:
     display_name: MobileNet V2
   - id: mobilenet-v3
     display_name: MobileNet V3
+  - id: mobilevit
+    display_name: MobileViT
   - id: movinet
     display_name: MoViNet
   - id: multiband-melgan
@@ -165,6 +171,10 @@ values:
     display_name: SSD Mobilenet V1
   - id: ssd-mobilenet-v2
     display_name: SSD Mobilenet V2
+  - id: ssd-mobilenet-v2-fpn
+    display_name: SSD Mobilenet V2 FPN
+  - id: ssd-spaghettinet-edgetpu-large
+    display_name: SSD Spaghettinet EdgeTPU Large
   - id: swivel
     display_name: Swivel
   - id: tacotron2
@@ -211,6 +221,8 @@ values:
     display_name: Big Transfer
   - id: swin-transformer
     display_name: Swin Transformer
+  - id: video-swin-transformer
+    display_name: Video Swin Transformer
   - id: vit
     display_name: Vision Transformer
   - id: mixer
@@ -231,3 +243,15 @@ values:
     display_name: RegNetX
   - id: yolo
     display_name: YOLO
+  - id: convnext
+    display_name: ConvNeXT
+  - id: deit
+    display_name: DeiT
+  - id: cait
+    display_name: CaiT
+  - id: xcit
+    display_name: XCiT
+  - id: maxim
+    display_name: MAXIM
+  - id: mosaic
+    display_name: MOSAIC

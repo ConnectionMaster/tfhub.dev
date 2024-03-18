@@ -51,7 +51,6 @@ ALLOWED_URL_PREFIXES = frozenset({
     "https://www.gstatic.com/",
     "https://storage.googleapis.com/tfhub-visualizers/",
     "https://storage.googleapis.com/interactive_visualizer/",
-    "https://overlay.sandbox.google.com/"
 })
 HTTPS_SCHEME = "https"
 # Field names used by UrlTagParser.
@@ -123,7 +122,7 @@ class TagDefinitionFileParser(metaclass=abc.ABCMeta):
     self._file_path = file_path
     self.required_top_keys = required_top_keys
     self.optional_top_keys = optional_top_keys
-    self.supported_top_keys = set.union(self.required_top_keys,
+    self.supported_top_keys = set.union(self.required_top_keys,  # pytype: disable=wrong-arg-types
                                         self.optional_top_keys)
 
   @classmethod

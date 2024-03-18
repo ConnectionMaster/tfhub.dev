@@ -17,6 +17,7 @@
 import contextlib
 import os
 import textwrap
+import time
 from typing import Optional
 from unittest import mock
 import urllib.request
@@ -329,11 +330,15 @@ class ValidatorTest(parameterized.TestCase, tf.test.TestCase):
     self.set_up_publisher_page(_GOOGLE_PUBLISHER)
     self.asset_path_modified = mock.patch.object(
         validator, "_is_asset_path_modified", return_value=True)
+    self.should_sleep = mock.patch.object(
+        validator, "_should_sleep", return_value=False)
     self.enumerable_parser = yaml_parser.EnumerableYamlParser(
         self.tmp_root_dir, "language")
     self.parser_by_tag = {"language": self.enumerable_parser}
     self.asset_path_modified.start()
+    self.should_sleep.start()
     self.addCleanup(self.asset_path_modified.stop)
+    self.addCleanup(self.should_sleep.stop)
 
   def get_full_path(self, file_path):
     return os.path.join(self.tmp_dir, file_path)
@@ -809,7 +814,7 @@ class ValidatorTest(parameterized.TestCase, tf.test.TestCase):
   def test_asset_path_is_github_download_url_test(self):
     self.set_content(
         self.markdown_file_path, MINIMAL_SAVED_MODEL_TEMPLATE %
-        "https://github.com/some_repo/releases/download/some_path.tar.gz")
+        "https://github.com/some_repo/some_path.tar.gz")
 
     with self.assertRaisesRegex(validator.MarkdownDocumentationError,
                                 ".*cannot be automatically fetched.*"):
@@ -1133,6 +1138,30 @@ class ValidatorTest(parameterized.TestCase, tf.test.TestCase):
       documentation_parser.validate(
           validation_config=validator.ValidationConfig(do_smoke_test=True),
           file_path=self.get_full_path(self.markdown_file_path))
+
+  @mock.patch.object(urllib.request, "urlopen", new=MockUrlOpen)
+  def test_does_not_sleep_in_workflow_without_smoke_test(self):
+    documentation_parser = self._get_parser_for_validating_saved_model_file(
+        "saved_model.pb", self.markdown_file_path)
+
+    with mock.patch.object(time, "sleep", autospec=True) as mock_sleep:
+      documentation_parser.validate(
+          validation_config=validator.ValidationConfig(do_smoke_test=False),
+          file_path=self.get_full_path(self.markdown_file_path))
+      mock_sleep.assert_not_called()
+
+  @mock.patch.object(urllib.request, "urlopen", new=MockUrlOpen)
+  def test_should_sleep_in_workflow_on_smoke_test(self):
+    self.should_sleep = mock.patch.object(
+        validator, "_should_sleep", return_value=True).start()
+    documentation_parser = self._get_parser_for_validating_saved_model_file(
+        "saved_model.pb", self.markdown_file_path)
+
+    with mock.patch.object(time, "sleep", autospec=True) as mock_sleep:
+      documentation_parser.validate(
+          validation_config=validator.ValidationConfig(do_smoke_test=True),
+          file_path=self.get_full_path(self.markdown_file_path))
+      mock_sleep.assert_called_once_with(5)
 
 
 if __name__ == "__main__":

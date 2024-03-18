@@ -1,5 +1,8 @@
+load("//third_party/bazel_rules/rules_python/python:defs.bzl", "py_library")
 load("//:tfhub_dev.bzl", "pytype_strict_binary", "pytype_strict_library", "pytype_strict_test")
 load("//tools/build_defs/testing:bzl_library.bzl", "bzl_library")  # buildifier: disable=load-on-top
+
+package(default_applicable_licenses = ["//third_party/py/tfhub_dev:license"])
 
 # Copyright 2020 The TensorFlow Hub Authors. All Rights Reserved.
 #
@@ -85,7 +88,6 @@ pytype_strict_library(
         ":filesystem_utils",
         "@io_abseil_py//absl/logging",
         "//third_party/py/ruamel",
-        "@org_tensorflow_tfhub_dev//tools:expect_tensorflow_installed",
         "//third_party/py/yaml",
     ],
 )
